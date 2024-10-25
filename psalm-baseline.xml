@@ -591,10 +591,6 @@
     <InvalidArgument>
       <code>$type</code>
     </InvalidArgument>
-    <RedundantCondition>
-      <code><![CDATA[$atomicType !== 'null']]></code>
-      <code><![CDATA[$atomicType->type !== 'mixed' && $atomicType !== 'null']]></code>
-    </RedundantCondition>
     <RedundantConditionGivenDocblockType>
       <code>$type instanceof ReflectionNamedType</code>
     </RedundantConditionGivenDocblockType>
