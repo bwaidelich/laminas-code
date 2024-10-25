@@ -10,7 +10,6 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 use function array_shift;
-use function get_class;
 use function trim;
 use function uniqid;
 
@@ -69,67 +68,72 @@ class ClassReflectionTest extends TestCase
     public function testGetContentsReturnsContents()
     {
         $reflectionClass = new ClassReflection(TestAsset\TestSampleClass2::class);
-        $target          = <<<EOS
-{
-    protected \$_prop1 = null;
 
-    /**
-     * @Sample({"foo":"bar"})
-     */
-    protected \$_prop2 = null;
-
-    public function getProp1()
-    {
-        return \$this->_prop1;
-    }
-
-    public function getProp2(\$param1, TestSampleClass \$param2)
-    {
-        return \$this->_prop2;
-    }
-
-    public function getIterator(): \Traversable
-    {
-        return new \EmptyIterator();
-    }
-
-}
-EOS;
-        $contents        = $reflectionClass->getContents();
+        // phpcs:disable SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly
+        $target   = <<<EOS
+            {
+                protected \$_prop1 = null;
+            
+                /**
+                 * @Sample({"foo":"bar"})
+                 */
+                protected \$_prop2 = null;
+            
+                public function getProp1()
+                {
+                    return \$this->_prop1;
+                }
+            
+                public function getProp2(\$param1, TestSampleClass \$param2)
+                {
+                    return \$this->_prop2;
+                }
+            
+                public function getIterator(): \Traversable
+                {
+                    return new \EmptyIterator();
+                }
+            
+            }
+            EOS;
+        $contents = $reflectionClass->getContents();
         self::assertEquals(trim($target), trim($contents));
+        // phpcs:enable
     }
 
     public function testGetContentsReturnsContentsWithImplementsOnSeparateLine()
     {
         $reflectionClass = new ClassReflection(TestAsset\TestSampleClass9::class);
-        $target          = <<<EOS
-{
-    protected \$_prop1 = null;
-
-    /**
-     * @Sample({"foo":"bar"})
-     */
-    protected \$_prop2 = null;
-
-    public function getProp1()
-    {
-        return \$this->_prop1;
-    }
-
-    public function getProp2(\$param1, TestSampleClass \$param2)
-    {
-        return \$this->_prop2;
-    }
-
-    public function getIterator(): \Traversable
-    {
-        return new \EmptyIterator();
-    }
-
-}
-EOS;
-        $contents        = $reflectionClass->getContents();
+        // phpcs:disable SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly
+        $target   = <<<EOS
+            {
+                protected \$_prop1 = null;
+            
+                /**
+                 * @Sample({"foo":"bar"})
+                 */
+                protected \$_prop2 = null;
+            
+                public function getProp1()
+                {
+                    return \$this->_prop1;
+                }
+            
+                public function getProp2(\$param1, TestSampleClass \$param2)
+                {
+                    return \$this->_prop2;
+                }
+            
+                public function getIterator(): \Traversable
+                {
+                    return new \EmptyIterator();
+                }
+            
+            }
+            EOS;
+        $contents = $reflectionClass->getContents();
         self::assertEquals(trim($target), trim($contents));
+        // phpcs:enable
     }
 
     public function testStartLine()
