@@ -3,6 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd"
 >
+    <arg value="ps" />
     <!-- Paths to check -->
     <file>src</file>
     <file>test</file>
@@ -40,5 +41,9 @@
 
         <!-- This rule produces invalid PHP 7.4 code -->
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference"/>
+
+        <!-- Forcing abstract classes to be named `abstract` is silly: `abstract` should be used carefully,
+             and is not used to represent "designed for inheritance" here, most often -->
+        <exclude name="WebimpressCodingStandard.NamingConventions.AbstractClass.Prefix"/>
     </rule>
 </ruleset>

@@ -4,6 +4,7 @@ namespace Laminas\Code\Generator;
 
 use Laminas\Code\Reflection\MethodReflection;
 
+use function array_map;
 use function explode;
 use function implode;
 use function is_array;
@@ -118,6 +119,9 @@ class MethodGenerator extends AbstractMemberGenerator
     /**
      * Generate from array
      *
+     * @deprecated this API is deprecated, and will be removed in the next major release. Please
+     *             use the other constructors of this class instead.
+     *
      * @configkey name             string        [required] Class Name
      * @configkey docblock         string        The DocBlock information
      * @configkey flags            int           Flags, one of self::FLAG_ABSTRACT, self::FLAG_FINAL
@@ -130,7 +134,6 @@ class MethodGenerator extends AbstractMemberGenerator
      * @configkey static           bool
      * @configkey visibility       string
      * @throws Exception\InvalidArgumentException
-     * @param  array $array
      * @return MethodGenerator
      */
     public static function fromArray(array $array)
@@ -363,14 +366,10 @@ class MethodGenerator extends AbstractMemberGenerator
             . ($this->returnsReference ? '& ' : '')
             . $this->getName() . '(';
 
-        $parameters = $this->getParameters();
-        if (! empty($parameters)) {
-            foreach ($parameters as $parameter) {
-                $parameterOutput[] = $parameter->generate();
-            }
-
-            $output .= implode(', ', $parameterOutput);
-        }
+        $output .= implode(', ', array_map(
+            static fn (ParameterGenerator $parameter): string => $parameter->generate(),
+            $this->getParameters()
+        ));
 
         $output .= ')';
 

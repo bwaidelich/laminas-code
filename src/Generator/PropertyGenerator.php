@@ -5,11 +5,8 @@ namespace Laminas\Code\Generator;
 use Laminas\Code\Reflection\PropertyReflection;
 
 use function array_reduce;
-use function get_class;
-use function gettype;
+use function get_debug_type;
 use function is_bool;
-use function is_object;
-use function method_exists;
 use function sprintf;
 use function str_replace;
 use function strtolower;
@@ -67,15 +64,17 @@ class PropertyGenerator extends AbstractMemberGenerator
             $property->omitDefaultValue = true;
         }
 
-        if ($reflectionProperty->getDocComment() != '') {
-            $property->setDocBlock(DocBlockGenerator::fromReflection($reflectionProperty->getDocBlock()));
+        $docBlock = $reflectionProperty->getDocBlock();
+
+        if ($docBlock) {
+            $property->setDocBlock(DocBlockGenerator::fromReflection($docBlock));
         }
 
         if ($reflectionProperty->isStatic()) {
             $property->setStatic(true);
         }
 
-        if (method_exists($reflectionProperty, 'isReadonly') && $reflectionProperty->isReadonly()) {
+        if ($reflectionProperty->isReadonly()) {
             $property->setReadonly(true);
         }
 
@@ -100,6 +99,9 @@ class PropertyGenerator extends AbstractMemberGenerator
     /**
      * Generate from array
      *
+     * @deprecated this API is deprecated, and will be removed in the next major release. Please
+     *             use the other constructors of this class instead.
+     *
      * @configkey name               string   [required] Class Name
      * @configkey const              bool
      * @configkey defaultvalue       null|bool|string|int|float|array|ValueGenerator
@@ -111,7 +113,6 @@ class PropertyGenerator extends AbstractMemberGenerator
      * @configkey omitdefaultvalue   bool
      * @configkey readonly           bool
      * @configkey type               null|TypeGenerator
-     * @param  array  $array
      * @return static
      * @throws Exception\InvalidArgumentException
      */
@@ -161,9 +162,7 @@ class PropertyGenerator extends AbstractMemberGenerator
                             '%s is expecting boolean on key %s. Got %s',
                             __METHOD__,
                             $name,
-                            is_object($value)
-                                ? get_class($value)
-                                : gettype($value)
+                            get_debug_type($value)
                         ));
                     }
 
@@ -176,7 +175,7 @@ class PropertyGenerator extends AbstractMemberGenerator
                             __METHOD__,
                             TypeGenerator::class,
                             $name,
-                            is_object($value) ? get_class($value) : gettype($value)
+                            get_debug_type($value)
                         ));
                     }
                     $property->setType($value);
@@ -230,9 +229,7 @@ class PropertyGenerator extends AbstractMemberGenerator
         return (bool) ($this->flags & self::FLAG_READONLY);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** @inheritDoc */
     public function setFlags($flags)
     {
         $flags = array_reduce((array) $flags, static function (int $a, int $b): int {
@@ -259,9 +256,9 @@ class PropertyGenerator extends AbstractMemberGenerator
     }
 
     /**
-     * @param  PropertyValueGenerator|mixed  $defaultValue
-     * @param  string                        $defaultValueType
-     * @param  string                        $defaultValueOutputMode
+     * @param  PropertyValueGenerator|mixed     $defaultValue
+     * @param  PropertyValueGenerator::TYPE_*   $defaultValueType
+     * @param  PropertyValueGenerator::OUTPUT_* $defaultValueOutputMode
      * @return static
      */
     public function setDefaultValue(
