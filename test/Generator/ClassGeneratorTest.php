@@ -3,6 +3,8 @@
 namespace LaminasTest\Code\Generator;
 
 use DateTime;
+use Laminas\Code\Generator\AttributeGenerator;
+use Laminas\Code\Generator\AttributeGenerator\AttributePrototype;
 use Laminas\Code\Generator\ClassGenerator;
 use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\Exception\ExceptionInterface;
@@ -52,6 +54,14 @@ class ClassGeneratorTest extends TestCase
         $classGenerator    = new ClassGenerator();
         $classGenerator->setDocBlock($docBlockGenerator);
         self::assertSame($docBlockGenerator, $classGenerator->getDocBlock());
+    }
+
+    public function testClassAttributesAccessors(): void
+    {
+        $attributeGenerator = AttributeGenerator::fromArray([]);
+        $classGenerator    = new ClassGenerator();
+        $classGenerator->setAttributes($attributeGenerator);
+        self::assertSame($attributeGenerator, $classGenerator->getAttributes());
     }
 
     public function testAbstractAccessors(): void
@@ -488,6 +498,49 @@ CODE;
 
         $docBlock = $classGenerator->getDocBlock();
         self::assertInstanceOf(DocBlockGenerator::class, $docBlock);
+    }
+
+    public function testCreateFromGeneratorWithAttributes(): void
+    {
+        $attributeName = 'AnyAttribute';
+        $attributeArguments = ['argument' => 2];
+        $attributeGenerator = AttributeGenerator::fromPrototype(new AttributePrototype($attributeName, $attributeArguments));
+
+        $classGenerator = ClassGenerator::fromArray([
+            'name' => 'AnyClassName',
+            'attribute' => $attributeGenerator,
+        ]);
+
+        $expectedGenerator = $attributeGenerator;
+        $attributeGenerator = $classGenerator->getAttributes();
+        self::assertInstanceOf(AttributeGenerator::class, $attributeGenerator);
+        self::assertEquals($expectedGenerator, $attributeGenerator);
+    }
+
+    public function testGenerateAttributes(): void
+    {
+        $attributeGenerator = AttributeGenerator::fromPrototype(
+            new AttributePrototype('FirstAttribute', ['firstArgument' => 'abc', 'secondArgument' => 12]),
+            new AttributePrototype('FirstAttribute', ['firstArgument' => 'abc', 'secondArgument' => 13]),
+            new AttributePrototype('SecondAttribute'),
+        );
+        $classGenerator = ClassGenerator::fromArray([
+            'name' => 'AnyClassName',
+            'attribute' => $attributeGenerator,
+        ]);
+
+        $generatedClass = $classGenerator->generate();
+
+        $expectedClassOutput = <<<CODE
+#[FirstAttribute(firstArgument: 'abc', secondArgument: 12)]
+#[FirstAttribute(firstArgument: 'abc', secondArgument: 13)]
+#[SecondAttribute]
+class AnyClassName
+{
+}
+
+CODE;
+        self::assertSame($expectedClassOutput, $generatedClass);
     }
 
     public function testCreateFromArrayWithDocBlockInstance(): void
